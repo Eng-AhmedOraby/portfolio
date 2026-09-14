@@ -178,7 +178,13 @@ import {
   getDocs, getDoc, setDoc, orderBy, query
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const ADMIN_PASSWORD = "ahmed2472002";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyDaVa4FCVnsH8_YINQoOP2MI_TQ7bKr88E",
@@ -190,23 +196,41 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 let currentModal = null;
 let editingId = null;
 let tempTags = [];
 
-window.doLogin = () => {
+window.doLogin = async () => {
+  const email = prompt("Enter admin email:");
   const pw = document.getElementById("pw-input").value;
-  if(pw === ADMIN_PASSWORD){
-    document.getElementById("login-screen").style.display = "none";
-    document.getElementById("app").style.display = "flex";
-    loadAll();
-  } else {
+
+  if (!email || !pw) {
+    document.getElementById("login-err").textContent =
+      "Enter email and password";
+    document.getElementById("login-err").style.display = "block";
+    return;
+  }
+
+  try {
+    await signInWithEmailAndPassword(auth, email, pw);
+
+    document.getElementById("login-err").style.display = "none";
+
+  } catch (err) {
+    console.error(err);
+
+    document.getElementById("login-err").textContent =
+      "Wrong email or password";
+
     document.getElementById("login-err").style.display = "block";
   }
 };
 
-window.logout = () => {
+window.logout = async () => {
+  await signOut(auth);
+
   document.getElementById("app").style.display = "none";
   document.getElementById("login-screen").style.display = "flex";
   document.getElementById("pw-input").value = "";
