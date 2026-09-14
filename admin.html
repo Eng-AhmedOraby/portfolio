@@ -76,15 +76,30 @@
   <div class="login-box">
     <h2>admin<span style="color:var(--dim)">.login()</span></h2>
     <p>Portfolio Admin Panel</p>
-    <p id="login-err">Wrong password</p>
-   <input
-  type="email"
-  id="email-input"
-  placeholder="Admin Email"
-  onkeydown="if(event.key==='Enter')doLogin()"
-     >
-    <input type="password" id="pw-input" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
-    <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Login →</button>
+
+    <p id="login-err"></p>
+
+    <input
+      type="email"
+      id="email-input"
+      placeholder="Admin Email"
+      onkeydown="if(event.key === 'Enter') doLogin()"
+    >
+
+    <input
+      type="password"
+      id="pw-input"
+      placeholder="Password"
+      onkeydown="if(event.key === 'Enter') doLogin()"
+    >
+
+    <button
+      class="btn btn-primary"
+      style="width:100%"
+      onclick="doLogin()"
+    >
+      Login →
+    </button>
   </div>
 </div>
 
@@ -188,7 +203,6 @@ import {
   getAuth,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 
@@ -209,21 +223,23 @@ let editingId = null;
 let tempTags = [];
 
 window.doLogin = async () => {
-  const email = document.getElementById("email-input").value.trim();
-  const pw = document.getElementById("pw-input").value;
-
+  const emailInput = document.getElementById("email-input");
+  const passwordInput = document.getElementById("pw-input");
   const error = document.getElementById("login-err");
 
-  if (!email || !pw) {
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+
+  error.style.display = "none";
+
+  if (!email || !password) {
     error.textContent = "Enter email and password";
     error.style.display = "block";
     return;
   }
 
   try {
-    await signInWithEmailAndPassword(auth, email, pw);
-
-    error.style.display = "none";
+    await signInWithEmailAndPassword(auth, email, password);
 
     document.getElementById("login-screen").style.display = "none";
     document.getElementById("app").style.display = "flex";
@@ -236,6 +252,16 @@ window.doLogin = async () => {
     error.textContent = "Wrong email or password";
     error.style.display = "block";
   }
+};
+
+window.logout = async () => {
+  await signOut(auth);
+
+  document.getElementById("app").style.display = "none";
+  document.getElementById("login-screen").style.display = "flex";
+
+  document.getElementById("email-input").value = "";
+  document.getElementById("pw-input").value = "";
 };
   
 window.logout = async () => {
