@@ -181,34 +181,14 @@
 <section id="skills">
   <div class="wrap">
     <div class="sec-head"><span class="sec-tag">// 02</span><h2 class="sec-title">Skills</h2></div>
-    <div class="skills-wrap">
-      <span class="skill-pill">C#</span>
-      <span class="skill-pill">ASP.NET Core</span>
-      <span class="skill-pill">Web API</span>
-      <span class="skill-pill">Entity Framework Core</span>
-      <span class="skill-pill">SQL Server</span>
-      <span class="skill-pill">REST Architecture</span>
-      <span class="skill-pill">JWT Authentication</span>
-      <span class="skill-pill">LINQ</span>
-      <span class="skill-pill">Clean Architecture</span>
-      <span class="skill-pill">Git &amp; GitHub</span>
-      <span class="skill-pill">HTML / CSS / JS</span>
-      <span class="skill-pill">Postman</span>
-    </div>
+    <div class="skills-wrap" id="skills-container"><span class="skill-pill" style="color:var(--text-dim)">Loading…</span></div>
   </div>
 </section>
 
 <section id="experience">
   <div class="wrap">
     <div class="sec-head"><span class="sec-tag">// 03</span><h2 class="sec-title">Experience</h2></div>
-    <div class="timeline">
-      <div class="tl-item">
-        <div class="tl-date">[2025 — Present]</div>
-        <div class="tl-role">[Job Title — e.g. Backend Developer]</div>
-        <div class="tl-company">[Company Name · Freelance / Full-time / Remote]</div>
-        <div class="tl-desc">[What you actually did: APIs you built, team size, tools used, an outcome if you have one.]</div>
-      </div>
-    </div>
+    <div class="timeline" id="experience-container"><p style="color:var(--text-dim);font-size:14px;">Loading…</p></div>
   </div>
 </section>
 
@@ -216,69 +196,14 @@
   <div class="wrap">
     <div class="sec-head"><span class="sec-tag">// 04</span><h2 class="sec-title">Projects</h2></div>
 
-    <div class="proj-card">
-      <div class="proj-head">
-        <span class="method get">GET</span>
-        <span class="endpoint">/api/sportmap</span>
-        <span class="status-200">200 OK</span>
-      </div>
-      <div class="proj-body">
-        <div class="proj-shot"><img src="sportmap.png" alt="SportMap app screenshot"></div>
-        <div class="proj-name">SportMap</div>
-        <p class="proj-desc">A football pitch booking platform with three roles: players search nearby pitches, view available time slots, and book instantly; pitch owners list their own pitches and manage available time slots; admins review and approve new pitches, and can suspend or remove existing ones.</p>
-        <div class="tech-row">
-          <span class="tech-tag">ASP.NET Core</span>
-          <span class="tech-tag">SQL Server</span>
-          <span class="tech-tag">EF Core</span>
-        </div>
-        <div class="proj-links">
-          <a href="https://github.com/Eng-AhmedOraby/SportMap.Api.git">Backend Repo →</a>
-          <a href="https://github.com/Eng-AhmedOraby/SportMap-Web.git">Frontend Repo →</a>
-          <a href="https://sport-map-web.vercel.app/">Live Demo →</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="proj-card">
-      <div class="proj-head">
-        <span class="method get">GET</span>
-        <span class="endpoint">/api/nuqaa</span>
-        <span class="status-200">200 OK</span>
-      </div>
-      <div class="proj-body">
-        <div class="proj-shot"><img src="nuqaa.png" alt="Nuqaa app screenshot"></div>
-        <div class="proj-name">Nuqaa</div>
-        <p class="proj-desc">A full e-commerce platform for skincare products — React frontend with an ASP.NET Core Web API backend, full admin dashboard for product management, image uploads via Cloudinary, and JWT authentication. Deployed live with the frontend on Vercel and the backend on MonsterASP.NET with a MySQL database.</p>
-        <div class="tech-row">
-          <span class="tech-tag">ASP.NET Core</span>
-          <span class="tech-tag">MySQL</span>
-          <span class="tech-tag">EF Core</span>
-          <span class="tech-tag">React</span>
-          <span class="tech-tag">Cloudinary</span>
-          <span class="tech-tag">JWT</span>
-        </div>
-        <div class="proj-links">
-          <a href="https://github.com/Eng-AhmedOraby/nuqaa-backend.git">Backend Repo →</a>
-          <a href="https://github.com/Eng-AhmedOraby/nuqaa-frontend.git">Frontend Repo →</a>
-          <a href="https://nuqaa-frontend.vercel.app/">Live Demo →</a>
-        </div>
-      </div>
-    </div>
-
+    <div id="projects-container"><p style="color:var(--text-dim);font-size:14px;">Loading…</p></div>
   </div>
 </section>
 
 <section id="certificates">
   <div class="wrap">
     <div class="sec-head"><span class="sec-tag">// 05</span><h2 class="sec-title">Certificates</h2></div>
-    <div class="cert-grid">
-      <div class="cert-card">
-        <div class="cert-img"><!-- Replace with: <img src="cert1.jpg" alt="Certificate name"> --></div>
-        <div class="cert-name">[Certificate Name]</div>
-        <div class="cert-issuer">[Issuer]</div>
-        <div class="cert-date">[Month Year]</div>
-      </div>
-    </div>
+    <div class="cert-grid" id="certificates-container"><p style="color:var(--text-dim);font-size:14px;">Loading…</p></div>
   </div>
 </section>
 
@@ -333,7 +258,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import {
-    getFirestore, collection, addDoc, query, where, getDocs, orderBy
+    getFirestore, collection, doc, addDoc, query, where, getDocs, getDoc, orderBy
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -401,6 +326,98 @@
     });
   }
 
+
+  // ======= DYNAMIC CONTENT LOADERS =======
+  async function loadSettings(){
+    try{
+      const snap = await getDoc(doc(db,"settings","main"));
+      if(!snap.exists()) return;
+      const a = snap.data();
+      if(a.heroStatus){ document.querySelector(".status-chip").childNodes[1].textContent = " "+a.heroStatus; }
+      if(a.heroDesc){ document.querySelector(".hero-desc").textContent = a.heroDesc; }
+      const ps = document.querySelectorAll(".about-text p");
+      if(a.p1 && ps[0]) ps[0].textContent = a.p1;
+      if(a.p2 && ps[1]) ps[1].textContent = a.p2;
+      if(a.p3 && ps[2]) ps[2].textContent = a.p3;
+      const stats = document.querySelectorAll(".stat-card");
+      const sv = [a.s1v,a.s2v,a.s3v,a.s4v];
+      const sl = [a.s1l,a.s2l,a.s3l,a.s4l];
+      stats.forEach((s,i)=>{
+        if(sv[i]) s.querySelector(".stat-num").textContent = sv[i];
+        if(sl[i]) s.querySelector(".stat-label").textContent = sl[i];
+      });
+    }catch(e){ console.error("settings",e); }
+  }
+
+  async function loadSkillsDynamic(){
+    const el = document.getElementById("skills-container"); if(!el) return;
+    try{
+      const snap = await getDocs(collection(db,"skills"));
+      if(snap.empty){ el.innerHTML=\'<span style="color:var(--text-dim);font-size:13px;">No skills added yet.</span>\'; return; }
+      el.innerHTML="";
+      snap.forEach(d=>{ el.innerHTML+=`<span class="skill-pill">${d.data().name}</span>`; });
+    }catch(e){ console.error(e); }
+  }
+
+  async function loadExperienceDynamic(){
+    const el = document.getElementById("experience-container"); if(!el) return;
+    try{
+      const snap = await getDocs(query(collection(db,"experience"), orderBy("createdAt","desc")));
+      if(snap.empty){ el.innerHTML=\'<p style="color:var(--text-dim);font-size:14px;">No experience added yet.</p>\'; return; }
+      el.innerHTML="";
+      snap.forEach(d=>{
+        const e=d.data();
+        el.innerHTML+=`<div class="tl-item"><div class="tl-date">${e.date||""}</div><div class="tl-role">${e.role||""}</div><div class="tl-company">${e.company||""}</div><div class="tl-desc">${e.desc||""}</div></div>`;
+      });
+    }catch(e){ console.error(e); }
+  }
+
+  async function loadProjectsDynamic(){
+    const el = document.getElementById("projects-container"); if(!el) return;
+    try{
+      const snap = await getDocs(query(collection(db,"projects"), orderBy("createdAt","asc")));
+      if(snap.empty){ el.innerHTML=\'<p style="color:var(--text-dim);font-size:14px;">No projects added yet.</p>\'; return; }
+      el.innerHTML="";
+      snap.forEach(d=>{
+        const p=d.data();
+        const techs=(p.techs||[]).map(t=>`<span class="tech-tag">${t}</span>`).join("");
+        const links=[(p.backRepo?`<a href="${p.backRepo}">Backend Repo →</a>`:""),
+                     (p.frontRepo?`<a href="${p.frontRepo}">Frontend Repo →</a>`:""),
+                     (p.liveDemo?`<a href="${p.liveDemo}">Live Demo →</a>`:"")].filter(Boolean).join("");
+        const shot = p.image ? `<img src="${p.image}" alt="${p.name} screenshot">` : "";
+        el.innerHTML+=`<div class="proj-card">
+          <div class="proj-head"><span class="method get">GET</span><span class="endpoint">${p.endpoint||"/api/project"}</span><span class="status-200">200 OK</span></div>
+          <div class="proj-body">
+            <div class="proj-shot">${shot}</div>
+            <div class="proj-name">${p.name}</div>
+            <p class="proj-desc">${p.desc}</p>
+            <div class="tech-row">${techs}</div>
+            <div class="proj-links">${links}</div>
+          </div>
+        </div>`;
+      });
+    }catch(e){ console.error(e); }
+  }
+
+  async function loadCertificatesDynamic(){
+    const el = document.getElementById("certificates-container"); if(!el) return;
+    try{
+      const snap = await getDocs(query(collection(db,"certificates"), orderBy("createdAt","desc")));
+      if(snap.empty){ el.innerHTML=\'<p style="color:var(--text-dim);font-size:14px;">No certificates added yet.</p>\'; return; }
+      el.innerHTML="";
+      snap.forEach(d=>{
+        const c=d.data();
+        const img = c.image ? `<img src="${c.image}" alt="${c.name}">` : "";
+        el.innerHTML+=`<div class="cert-card"><div class="cert-img">${img}</div><div class="cert-name">${c.name}</div><div class="cert-issuer">${c.issuer||""}</div><div class="cert-date">${c.date||""}</div></div>`;
+      });
+    }catch(e){ console.error(e); }
+  }
+
+  loadSettings();
+  loadSkillsDynamic();
+  loadExperienceDynamic();
+  loadProjectsDynamic();
+  loadCertificatesDynamic();
   loadReviews();
 </script>
 
