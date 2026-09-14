@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio Admin</title>
+<style>
+  :root{--bg:#0E1116;--elev:#151A21;--elev2:#1B222B;--line:#262E38;--text:#E7ECF1;--dim:#8B97A6;--amber:#D98E4A;--teal:#4FD1C5;--red:#E0667A;--green:#4FD1A0;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min-height:100vh;}
+  /* LOGIN */
+  #login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;}
+  .login-box{background:var(--elev);border:1px solid var(--line);border-radius:16px;padding:40px;width:340px;text-align:center;}
+  .login-box h2{font-size:22px;margin-bottom:8px;color:var(--amber);}
+  .login-box p{color:var(--dim);font-size:13px;margin-bottom:24px;}
+  .login-box input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:12px 14px;font-size:14px;outline:none;margin-bottom:12px;}
+  .login-box input:focus{border-color:var(--amber);}
+  #login-err{color:var(--red);font-size:12px;margin-bottom:8px;display:none;}
+  /* LAYOUT */
+  #app{display:none;flex-direction:row;min-height:100vh;}
+  aside{width:220px;background:var(--elev);border-right:1px solid var(--line);padding:24px 0;position:sticky;top:0;height:100vh;flex-shrink:0;}
+  .aside-logo{font-family:monospace;font-size:14px;color:var(--amber);padding:0 20px 24px;border-bottom:1px solid var(--line);margin-bottom:16px;}
+  .aside-logo span{color:var(--dim);}
+  .nav-item{display:block;padding:10px 20px;font-size:13px;color:var(--dim);cursor:pointer;transition:.15s;border-left:2px solid transparent;}
+  .nav-item:hover{color:var(--text);background:var(--elev2);}
+  .nav-item.active{color:var(--amber);border-left-color:var(--amber);background:var(--elev2);}
+  .aside-logout{padding:10px 20px;font-size:12px;color:var(--red);cursor:pointer;margin-top:auto;position:absolute;bottom:20px;}
+  main{flex:1;padding:32px;overflow-y:auto;}
+  /* SECTIONS */
+  .section{display:none;}
+  .section.active{display:block;}
+  .sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+  .sec-header h2{font-size:22px;font-weight:600;}
+  /* BUTTONS */
+  .btn{font-size:13px;padding:9px 18px;border-radius:8px;border:1px solid var(--line);cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
+  .btn-primary{background:var(--amber);color:#1A1208;border-color:var(--amber);}
+  .btn-primary:hover{background:#ECA465;}
+  .btn-danger{background:transparent;color:var(--red);border-color:var(--red);}
+  .btn-danger:hover{background:var(--red);color:#fff;}
+  .btn-ghost{background:transparent;color:var(--text);border-color:var(--line);}
+  .btn-ghost:hover{border-color:var(--amber);color:var(--amber);}
+  .btn-sm{padding:5px 12px;font-size:12px;}
+  /* CARDS LIST */
+  .item-card{background:var(--elev);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin-bottom:12px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+  .item-info{flex:1;}
+  .item-title{font-size:15px;font-weight:600;margin-bottom:4px;}
+  .item-sub{font-size:12px;color:var(--dim);}
+  .item-actions{display:flex;gap:8px;flex-shrink:0;}
+  /* MODAL */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;justify-content:center;display:none;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--elev);border:1px solid var(--line);border-radius:16px;padding:28px;width:min(560px,95vw);max-height:90vh;overflow-y:auto;}
+  .modal h3{font-size:18px;margin-bottom:20px;color:var(--amber);}
+  .form-group{margin-bottom:14px;}
+  .form-group label{display:block;font-size:12px;color:var(--dim);margin-bottom:6px;}
+  .form-group input,.form-group textarea,.form-group select{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:10px 12px;font-size:13px;outline:none;font-family:inherit;}
+  .form-group input:focus,.form-group textarea:focus{border-color:var(--amber);}
+  .form-group textarea{resize:vertical;min-height:80px;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;border-top:1px solid var(--line);padding-top:16px;}
+  /* TOAST */
+  #toast{position:fixed;bottom:24px;right:24px;background:var(--elev);border:1px solid var(--teal);color:var(--teal);padding:12px 20px;border-radius:10px;font-size:13px;z-index:200;display:none;}
+  #toast.err{border-color:var(--red);color:var(--red);}
+  /* TAGS INPUT */
+  .tags-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .tag-pill{background:var(--elev2);border:1px solid var(--line);border-radius:6px;padding:3px 10px;font-size:12px;display:flex;align-items:center;gap:6px;}
+  .tag-pill button{background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;line-height:1;}
+  .empty-state{text-align:center;padding:48px;color:var(--dim);font-size:14px;}
+  .img-preview{width:100%;height:140px;object-fit:cover;border-radius:8px;margin-top:8px;display:none;border:1px solid var(--line);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <h2>admin<span style="color:var(--dim)">.login()</span></h2>
+    <p>Portfolio Admin Panel</p>
+    <p id="login-err">Wrong password</p>
+    <input type="password" id="pw-input" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Login →</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <aside>
+    <div class="aside-logo">ahmed<span>.admin()</span></div>
+    <div class="nav-item active" onclick="showSection('projects')">📁 Projects</div>
+    <div class="nav-item" onclick="showSection('skills')">🛠 Skills</div>
+    <div class="nav-item" onclick="showSection('experience')">💼 Experience</div>
+    <div class="nav-item" onclick="showSection('certificates')">🏆 Certificates</div>
+    <div class="nav-item" onclick="showSection('about')">👤 About</div>
+    <div class="aside-logout" onclick="logout()">⬅ Logout</div>
+  </aside>
+  <main>
+
+    <!-- PROJECTS -->
+    <div id="sec-projects" class="section active">
+      <div class="sec-header">
+        <h2>Projects</h2>
+        <button class="btn btn-primary" onclick="openModal('project')">+ Add Project</button>
+      </div>
+      <div id="projects-list"></div>
+    </div>
+
+    <!-- SKILLS -->
+    <div id="sec-skills" class="section">
+      <div class="sec-header">
+        <h2>Skills</h2>
+        <button class="btn btn-primary" onclick="openModal('skill')">+ Add Skill</button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px" id="skills-list"></div>
+    </div>
+
+    <!-- EXPERIENCE -->
+    <div id="sec-experience" class="section">
+      <div class="sec-header">
+        <h2>Experience</h2>
+        <button class="btn btn-primary" onclick="openModal('experience')">+ Add Experience</button>
+      </div>
+      <div id="experience-list"></div>
+    </div>
+
+    <!-- CERTIFICATES -->
+    <div id="sec-certificates" class="section">
+      <div class="sec-header">
+        <h2>Certificates</h2>
+        <button class="btn btn-primary" onclick="openModal('certificate')">+ Add Certificate</button>
+      </div>
+      <div id="certificates-list"></div>
+    </div>
+
+    <!-- ABOUT -->
+    <div id="sec-about" class="section">
+      <div class="sec-header"><h2>About / Hero</h2></div>
+      <div style="background:var(--elev);border:1px solid var(--line);border-radius:12px;padding:24px;">
+        <div class="form-group"><label>Status Chip Text</label><input id="ab-status" placeholder="200 OK — open to backend roles"></div>
+        <div class="form-group"><label>Hero Description</label><textarea id="ab-herodesc" rows="3"></textarea></div>
+        <div class="form-group"><label>About Paragraph 1</label><textarea id="ab-p1" rows="3"></textarea></div>
+        <div class="form-group"><label>About Paragraph 2</label><textarea id="ab-p2" rows="3"></textarea></div>
+        <div class="form-group"><label>About Paragraph 3</label><textarea id="ab-p3" rows="3"></textarea></div>
+        <div class="form-row">
+          <div class="form-group"><label>Stat 1 Value</label><input id="ab-s1v" placeholder="04"></div>
+          <div class="form-group"><label>Stat 1 Label</label><input id="ab-s1l" placeholder="APIs shipped"></div>
+          <div class="form-group"><label>Stat 2 Value</label><input id="ab-s2v" placeholder="02"></div>
+          <div class="form-group"><label>Stat 2 Label</label><input id="ab-s2l" placeholder="Full-stack builds"></div>
+          <div class="form-group"><label>Stat 3 Value</label><input id="ab-s3v" placeholder="C#"></div>
+          <div class="form-group"><label>Stat 3 Label</label><input id="ab-s3l" placeholder="Core language"></div>
+          <div class="form-group"><label>Stat 4 Value</label><input id="ab-s4v" placeholder=".NET"></div>
+          <div class="form-group"><label>Stat 4 Label</label><input id="ab-s4l" placeholder="Framework"></div>
+        </div>
+        <button class="btn btn-primary" onclick="saveAbout()">Save About</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal" id="modal-box">
+    <h3 id="modal-title">Add</h3>
+    <div id="modal-body"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="modal-save-btn" onclick="saveModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, doc, addDoc, updateDoc, deleteDoc,
+  getDocs, getDoc, setDoc, orderBy, query
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const ADMIN_PASSWORD = "ahmed@2026";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDaVa4FCVnsH8_YINQoOP2MI_TQ7bKr88E",
+  authDomain: "ahmed-portfolio-45cbc.firebaseapp.com",
+  projectId: "ahmed-portfolio-45cbc",
+  storageBucket: "ahmed-portfolio-45cbc.firebasestorage.app",
+  messagingSenderId: "1003880575628",
+  appId: "1:1003880575628:web:4f3af314e902eaec3141a9"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let currentModal = null;
+let editingId = null;
+let tempTags = [];
+
+window.doLogin = () => {
+  const pw = document.getElementById("pw-input").value;
+  if(pw === ADMIN_PASSWORD){
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("app").style.display = "flex";
+    loadAll();
+  } else {
+    document.getElementById("login-err").style.display = "block";
+  }
+};
+
+window.logout = () => {
+  document.getElementById("app").style.display = "none";
+  document.getElementById("login-screen").style.display = "flex";
+  document.getElementById("pw-input").value = "";
+};
+
+window.showSection = (name) => {
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  document.getElementById("sec-"+name).classList.add("active");
+  event.target.classList.add("active");
+};
+
+function toast(msg, err=false){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = err ? "err" : "";
+  t.style.display = "block";
+  setTimeout(() => t.style.display = "none", 3000);
+}
+
+// ============ PROJECTS ============
+async function loadProjects(){
+  const snap = await getDocs(query(collection(db,"projects"), orderBy("createdAt","desc")));
+  const el = document.getElementById("projects-list");
+  if(snap.empty){ el.innerHTML = '<div class="empty-state">No projects yet. Click + Add Project.</div>'; return; }
+  el.innerHTML = "";
+  snap.forEach(d => {
+    const p = d.data();
+    el.innerHTML += `<div class="item-card">
+      <div class="item-info">
+        <div class="item-title">${p.name}</div>
+        <div class="item-sub">${p.endpoint} &nbsp;|&nbsp; ${(p.techs||[]).join(", ")}</div>
+      </div>
+      <div class="item-actions">
+        <button class="btn btn-ghost btn-sm" onclick="editProject('${d.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteItem('projects','${d.id}',loadProjects)">Delete</button>
+      </div>
+    </div>`;
+  });
+}
+
+window.editProject = async (id) => {
+  const snap = await getDoc(doc(db,"projects",id));
+  const p = snap.data();
+  tempTags = [...(p.techs||[])];
+  editingId = id;
+  openModal("project", p);
+};
+
+// ============ SKILLS ============
+async function loadSkills(){
+  const snap = await getDocs(collection(db,"skills"));
+  const el = document.getElementById("skills-list");
+  if(snap.empty){ el.innerHTML = '<div class="empty-state">No skills yet.</div>'; return; }
+  el.innerHTML = "";
+  snap.forEach(d => {
+    el.innerHTML += `<div class="tag-pill">${d.data().name}<button onclick="deleteItem('skills','${d.id}',loadSkills)">×</button></div>`;
+  });
+}
+
+// ============ EXPERIENCE ============
+async function loadExperience(){
+  const snap = await getDocs(query(collection(db,"experience"), orderBy("createdAt","desc")));
+  const el = document.getElementById("experience-list");
+  if(snap.empty){ el.innerHTML = '<div class="empty-state">No experience yet.</div>'; return; }
+  el.innerHTML = "";
+  snap.forEach(d => {
+    const e = d.data();
+    el.innerHTML += `<div class="item-card">
+      <div class="item-info">
+        <div class="item-title">${e.role}</div>
+        <div class="item-sub">${e.company} &nbsp;|&nbsp; ${e.date}</div>
+      </div>
+      <div class="item-actions">
+        <button class="btn btn-ghost btn-sm" onclick="editExp('${d.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteItem('experience','${d.id}',loadExperience)">Delete</button>
+      </div>
+    </div>`;
+  });
+}
+
+window.editExp = async (id) => {
+  const snap = await getDoc(doc(db,"experience",id));
+  editingId = id;
+  openModal("experience", snap.data());
+};
+
+// ============ CERTIFICATES ============
+async function loadCertificates(){
+  const snap = await getDocs(collection(db,"certificates"));
+  const el = document.getElementById("certificates-list");
+  if(snap.empty){ el.innerHTML = '<div class="empty-state">No certificates yet.</div>'; return; }
+  el.innerHTML = "";
+  snap.forEach(d => {
+    const c = d.data();
+    el.innerHTML += `<div class="item-card">
+      <div class="item-info">
+        <div class="item-title">${c.name}</div>
+        <div class="item-sub">${c.issuer} &nbsp;|&nbsp; ${c.date}</div>
+      </div>
+      <div class="item-actions">
+        <button class="btn btn-ghost btn-sm" onclick="editCert('${d.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteItem('certificates','${d.id}',loadCertificates)">Delete</button>
+      </div>
+    </div>`;
+  });
+}
+
+window.editCert = async (id) => {
+  const snap = await getDoc(doc(db,"certificates",id));
+  editingId = id;
+  openModal("certificate", snap.data());
+};
+
+// ============ ABOUT ============
+async function loadAbout(){
+  const snap = await getDoc(doc(db,"settings","main"));
+  if(!snap.exists()) return;
+  const a = snap.data();
+  document.getElementById("ab-status").value = a.heroStatus||"";
+  document.getElementById("ab-herodesc").value = a.heroDesc||"";
+  document.getElementById("ab-p1").value = a.p1||"";
+  document.getElementById("ab-p2").value = a.p2||"";
+  document.getElementById("ab-p3").value = a.p3||"";
+  document.getElementById("ab-s1v").value = a.s1v||"";
+  document.getElementById("ab-s1l").value = a.s1l||"";
+  document.getElementById("ab-s2v").value = a.s2v||"";
+  document.getElementById("ab-s2l").value = a.s2l||"";
+  document.getElementById("ab-s3v").value = a.s3v||"";
+  document.getElementById("ab-s3l").value = a.s3l||"";
+  document.getElementById("ab-s4v").value = a.s4v||"";
+  document.getElementById("ab-s4l").value = a.s4l||"";
+}
+
+window.saveAbout = async () => {
+  await setDoc(doc(db,"settings","main"),{
+    heroStatus: document.getElementById("ab-status").value,
+    heroDesc: document.getElementById("ab-herodesc").value,
+    p1: document.getElementById("ab-p1").value,
+    p2: document.getElementById("ab-p2").value,
+    p3: document.getElementById("ab-p3").value,
+    s1v: document.getElementById("ab-s1v").value,
+    s1l: document.getElementById("ab-s1l").value,
+    s2v: document.getElementById("ab-s2v").value,
+    s2l: document.getElementById("ab-s2l").value,
+    s3v: document.getElementById("ab-s3v").value,
+    s3l: document.getElementById("ab-s3l").value,
+    s4v: document.getElementById("ab-s4v").value,
+    s4l: document.getElementById("ab-s4l").value,
+  });
+  toast("About saved!");
+};
+
+function loadAll(){ loadProjects(); loadSkills(); loadExperience(); loadCertificates(); loadAbout(); }
+
+// ============ DELETE ============
+window.deleteItem = async (col, id, reload) => {
+  if(!confirm("Delete this item?")) return;
+  await deleteDoc(doc(db,col,id));
+  toast("Deleted");
+  reload();
+};
+
+// ============ MODAL ============
+window.openModal = (type, data={}) => {
+  currentModal = type;
+  editingId = data.id || null;
+  if(type !== "project") tempTags = [];
+  const title = (editingId ? "Edit " : "Add ") + type.charAt(0).toUpperCase()+type.slice(1);
+  document.getElementById("modal-title").textContent = title;
+  let html = "";
+
+  if(type === "project"){
+    if(!editingId) tempTags = [];
+    html = `
+      <div class="form-group"><label>Project Name *</label><input id="f-name" value="${data.name||""}" placeholder="SportMap"></div>
+      <div class="form-group"><label>API Endpoint *</label><input id="f-endpoint" value="${data.endpoint||""}" placeholder="/api/sportmap"></div>
+      <div class="form-group"><label>Description *</label><textarea id="f-desc">${data.desc||""}</textarea></div>
+      <div class="form-group"><label>Tech Stack (type + Enter)</label>
+        <input id="f-tech-input" placeholder="ASP.NET Core" onkeydown="addTag(event)">
+        <div class="tags-wrap" id="tags-display"></div>
+      </div>
+      <div class="form-group"><label>Backend Repo URL</label><input id="f-back" value="${data.backRepo||""}" placeholder="https://github.com/..."></div>
+      <div class="form-group"><label>Frontend Repo URL</label><input id="f-front" value="${data.frontRepo||""}" placeholder="https://github.com/... (optional)"></div>
+      <div class="form-group"><label>Live Demo URL</label><input id="f-demo" value="${data.liveDemo||""}" placeholder="https://..."></div>
+      <div class="form-group"><label>Image URL (upload to GitHub and paste raw link)</label><input id="f-img" value="${data.image||""}" oninput="previewImg(this.value)" placeholder="https://raw.githubusercontent.com/..."></div>
+      <img id="img-preview" class="img-preview" src="">
+    `;
+  } else if(type === "skill"){
+    html = `<div class="form-group"><label>Skill Name *</label><input id="f-name" value="${data.name||""}" placeholder="ASP.NET Core"></div>`;
+  } else if(type === "experience"){
+    html = `
+      <div class="form-row">
+        <div class="form-group"><label>Date Range *</label><input id="f-date" value="${data.date||""}" placeholder="2024 — Present"></div>
+        <div class="form-group"><label>Role *</label><input id="f-role" value="${data.role||""}" placeholder="Backend Developer"></div>
+      </div>
+      <div class="form-group"><label>Company / Type</label><input id="f-company" value="${data.company||""}" placeholder="Freelance · Remote"></div>
+      <div class="form-group"><label>Description</label><textarea id="f-desc">${data.desc||""}</textarea></div>
+    `;
+  } else if(type === "certificate"){
+    html = `
+      <div class="form-group"><label>Certificate Name *</label><input id="f-name" value="${data.name||""}" placeholder="ASP.NET Core Fundamentals"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Issuer *</label><input id="f-issuer" value="${data.issuer||""}" placeholder="Microsoft / Udemy"></div>
+        <div class="form-group"><label>Date</label><input id="f-date" value="${data.date||""}" placeholder="Jan 2025"></div>
+      </div>
+      <div class="form-group"><label>Image URL</label><input id="f-img" value="${data.image||""}" oninput="previewImg(this.value)" placeholder="https://..."></div>
+      <img id="img-preview" class="img-preview" src="">
+    `;
+  }
+
+  document.getElementById("modal-body").innerHTML = html;
+  document.getElementById("modal-overlay").classList.add("open");
+
+  if(type === "project"){
+    renderTags();
+    if(data.image){ previewImg(data.image); }
+  }
+};
+
+window.closeModal = () => {
+  document.getElementById("modal-overlay").classList.remove("open");
+  currentModal = null; editingId = null; tempTags = [];
+};
+window.closeModalOutside = (e) => { if(e.target.id === "modal-overlay") closeModal(); };
+
+window.addTag = (e) => {
+  if(e.key !== "Enter") return;
+  e.preventDefault();
+  const val = e.target.value.trim();
+  if(val && !tempTags.includes(val)){ tempTags.push(val); e.target.value=""; renderTags(); }
+};
+window.removeTag = (t) => { tempTags = tempTags.filter(x=>x!==t); renderTags(); };
+function renderTags(){
+  const el = document.getElementById("tags-display");
+  if(!el) return;
+  el.innerHTML = tempTags.map(t=>`<div class="tag-pill">${t}<button type="button" onclick="removeTag('${t}')">×</button></div>`).join("");
+}
+window.previewImg = (url) => {
+  const img = document.getElementById("img-preview");
+  if(!img) return;
+  if(url){ img.src=url; img.style.display="block"; }
+  else { img.style.display="none"; }
+};
+
+window.saveModal = async () => {
+  const btn = document.getElementById("modal-save-btn");
+  btn.disabled = true; btn.textContent = "Saving...";
+  try{
+    if(currentModal === "project"){
+      const data = {
+        name: document.getElementById("f-name").value.trim(),
+        endpoint: document.getElementById("f-endpoint").value.trim(),
+        desc: document.getElementById("f-desc").value.trim(),
+        techs: tempTags,
+        backRepo: document.getElementById("f-back").value.trim(),
+        frontRepo: document.getElementById("f-front").value.trim(),
+        liveDemo: document.getElementById("f-demo").value.trim(),
+        image: document.getElementById("f-img").value.trim(),
+        createdAt: new Date()
+      };
+      if(!data.name || !data.endpoint || !data.desc){ toast("Fill required fields",true); return; }
+      if(editingId){ await updateDoc(doc(db,"projects",editingId),data); }
+      else { await addDoc(collection(db,"projects"),data); }
+      loadProjects();
+    } else if(currentModal === "skill"){
+      const name = document.getElementById("f-name").value.trim();
+      if(!name){ toast("Enter skill name",true); return; }
+      await addDoc(collection(db,"skills"),{name, createdAt:new Date()});
+      loadSkills();
+    } else if(currentModal === "experience"){
+      const data = {
+        date: document.getElementById("f-date").value.trim(),
+        role: document.getElementById("f-role").value.trim(),
+        company: document.getElementById("f-company").value.trim(),
+        desc: document.getElementById("f-desc").value.trim(),
+        createdAt: new Date()
+      };
+      if(!data.role){ toast("Enter role",true); return; }
+      if(editingId){ await updateDoc(doc(db,"experience",editingId),data); }
+      else { await addDoc(collection(db,"experience"),data); }
+      loadExperience();
+    } else if(currentModal === "certificate"){
+      const data = {
+        name: document.getElementById("f-name").value.trim(),
+        issuer: document.getElementById("f-issuer").value.trim(),
+        date: document.getElementById("f-date").value.trim(),
+        image: document.getElementById("f-img").value.trim(),
+        createdAt: new Date()
+      };
+      if(!data.name){ toast("Enter certificate name",true); return; }
+      if(editingId){ await updateDoc(doc(db,"certificates",editingId),data); }
+      else { await addDoc(collection(db,"certificates"),data); }
+      loadCertificates();
+    }
+    toast("Saved!");
+    closeModal();
+  } catch(err){ console.error(err); toast("Error: "+err.message, true); }
+  finally{ btn.disabled=false; btn.textContent="Save"; }
+};
+
+</script>
+</body>
+</html>
