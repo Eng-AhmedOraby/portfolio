@@ -77,6 +77,12 @@
     <h2>admin<span style="color:var(--dim)">.login()</span></h2>
     <p>Portfolio Admin Panel</p>
     <p id="login-err">Wrong password</p>
+   <input
+  type="email"
+  id="email-input"
+  placeholder="Admin Email"
+  onkeydown="if(event.key==='Enter')doLogin()"
+     >
     <input type="password" id="pw-input" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Login →</button>
   </div>
@@ -203,36 +209,42 @@ let editingId = null;
 let tempTags = [];
 
 window.doLogin = async () => {
-  const email = prompt("Enter admin email:");
+  const email = document.getElementById("email-input").value.trim();
   const pw = document.getElementById("pw-input").value;
 
+  const error = document.getElementById("login-err");
+
   if (!email || !pw) {
-    document.getElementById("login-err").textContent =
-      "Enter email and password";
-    document.getElementById("login-err").style.display = "block";
+    error.textContent = "Enter email and password";
+    error.style.display = "block";
     return;
   }
 
   try {
     await signInWithEmailAndPassword(auth, email, pw);
 
-    document.getElementById("login-err").style.display = "none";
+    error.style.display = "none";
+
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("app").style.display = "flex";
+
+    loadAll();
 
   } catch (err) {
     console.error(err);
 
-    document.getElementById("login-err").textContent =
-      "Wrong email or password";
-
-    document.getElementById("login-err").style.display = "block";
+    error.textContent = "Wrong email or password";
+    error.style.display = "block";
   }
 };
-
+  
 window.logout = async () => {
   await signOut(auth);
 
   document.getElementById("app").style.display = "none";
   document.getElementById("login-screen").style.display = "flex";
+
+  document.getElementById("email-input").value = "";
   document.getElementById("pw-input").value = "";
 };
 
