@@ -569,7 +569,10 @@ window.saveModal = async () => {
   } catch(err){ console.error(err); toast("Error: "+err.message, true); }
   finally{ btn.disabled=false; btn.textContent="Save"; }
 };
-
+window.loadSkills = loadSkills;
+window.loadProjects = loadProjects;
+window.loadExperience = loadExperience;
+window.loadCertificates = loadCertificates;
 </script>
 </body>
 </html>
